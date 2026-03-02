@@ -11,7 +11,9 @@ funct7: "0x00"
 operation: "rd = rs1 >> shamt"
 exampleusage: "// x5 = x6 >> 3 (logical)\nsrli x5, x6, 3"
 notes:
-  - The shift amount is encoded in the lower 5 bits of the immediate (RV32) or 6 bits (RV64)
-  - Zeros are shifted into the upper bits
-  - Equivalent to unsigned division by 2^shamt
+  - "`>>` is the logical right shift operator (moves bits toward less significant positions)"
+  - "`shamt` (shift amount) is a 5-bit value (0-31) encoded in the instruction"
+  - Zeros are shifted into the upper (most significant) bits
+  - Logical right shift treats the value as unsigned (use SRAI for signed values)
+  - Right shifting by n is equivalent to unsigned division by 2^n
 ---

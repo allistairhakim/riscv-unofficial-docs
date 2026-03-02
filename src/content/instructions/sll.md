@@ -11,6 +11,8 @@ funct7: "0x00"
 operation: "rd = rs1 << rs2[4:0]"
 exampleusage: "// x5 = x6 << x7[4:0]\nsll x5, x6, x7"
 notes:
-  - Zeros are shifted into the lower bits
-  - Only the lower 5 bits of rs2 are used for the shift amount (RV32)
+  - "`<<` is the left shift operator (moves bits toward more significant positions)"
+  - "`rs2[4:0]` means bits 4 down to 0 of rs2 (the lowest 5 bits), giving a shift amount of 0-31"
+  - Zeros are shifted into the lower (least significant) bits
+  - Left shifting by n is equivalent to multiplying by 2^n
 ---

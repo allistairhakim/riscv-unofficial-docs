@@ -8,11 +8,13 @@ encoding: I
 opcode: "0000011"
 funct3: "0x5"
 funct7: ""
-operation: "rd = zext(M[rs1 + sext(offset)][15:0])"
+operation: "rd = zero-extend(Memory[rs1 + sign-extend(offset)][15:0])"
 exampleusage: "// x5 = zero-extended halfword at address (x6 + 4)\nlhu x5, 4(x6)"
 notes:
-  - The 12-bit offset is sign-extended before adding to the base address
-  - The loaded halfword is zero-extended (not sign-extended) to fill the register
+  - "`Memory[address]` reads from memory at the computed address"
+  - "`[15:0]` means bits 15 down to 0 (the lowest 16 bits, i.e., one halfword)"
+  - "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit"
+  - "`zero-extend(...)` pads the upper bits with zeros (e.g., 0xFFFF becomes 0x0000FFFF, not 0xFFFFFFFF)"
   - Address should be naturally aligned (2-byte boundary) for best performance
-  - Use for unsigned halfword data
+  - Use LHU (not LH) when loading unsigned halfword values
 ---

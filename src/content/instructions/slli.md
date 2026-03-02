@@ -11,7 +11,8 @@ funct7: "0x00"
 operation: "rd = rs1 << shamt"
 exampleusage: "// x5 = x6 << 3\nslli x5, x6, 3"
 notes:
-  - The shift amount is encoded in the lower 5 bits of the immediate (RV32) or 6 bits (RV64)
-  - Zeros are shifted into the lower bits
-  - Equivalent to multiplying by 2^shamt
+  - "`<<` is the left shift operator (moves bits toward more significant positions)"
+  - "`shamt` (shift amount) is a 5-bit value (0-31) encoded in the instruction"
+  - Zeros are shifted into the lower (least significant) bits
+  - Left shifting by n is equivalent to multiplying by 2^n
 ---

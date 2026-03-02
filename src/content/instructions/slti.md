@@ -8,9 +8,10 @@ encoding: I
 opcode: "0010011"
 funct3: "0x2"
 funct7: ""
-operation: "rd = (rs1 <s sext(imm)) ? 1 : 0"
+operation: "rd = (rs1 <s sign-extend(imm)) ? 1 : 0"
 exampleusage: "// x5 = (x6 < 10) ? 1 : 0 (signed)\nslti x5, x6, 10"
 notes:
-  - Comparison is performed as signed integers
+  - "`<s` means signed comparison (treating values as two's complement signed integers)"
+  - "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits by copying its sign bit"
   - Result is always 0 or 1
 ---

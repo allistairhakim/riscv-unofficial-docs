@@ -8,10 +8,12 @@ encoding: I
 opcode: "0000011"
 funct3: "0x1"
 funct7: ""
-operation: "rd = sext(M[rs1 + sext(offset)][15:0])"
+operation: "rd = sign-extend(Memory[rs1 + sign-extend(offset)][15:0])"
 exampleusage: "// x5 = sign-extended halfword at address (x6 + 4)\nlh x5, 4(x6)"
 notes:
-  - The 12-bit offset is sign-extended before adding to the base address
-  - The loaded halfword is sign-extended to fill the register
+  - "`Memory[address]` reads from memory at the computed address"
+  - "`[15:0]` means bits 15 down to 0 (the lowest 16 bits, i.e., one halfword)"
+  - "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit"
+  - "`sign-extend(...)` on the loaded halfword expands it from 16 bits to 32/64 bits, preserving negative values"
   - Address should be naturally aligned (2-byte boundary) for best performance
 ---
