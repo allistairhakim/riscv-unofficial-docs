@@ -8,6 +8,7 @@ encoding: I
 opcode: "1110011"
 funct3: "0x0"
 funct7: ""
+funct12: "0x000"
 operation: "RaiseException(EnvironmentCall)"
 exampleusage: "// Make a system call (syscall number typically in a7)\necall"
 notes:

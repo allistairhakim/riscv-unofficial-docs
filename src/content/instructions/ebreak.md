@@ -8,6 +8,7 @@ encoding: I
 opcode: "1110011"
 funct3: "0x0"
 funct7: ""
+funct12: "0x001"
 operation: "RaiseException(Breakpoint)"
 exampleusage: "// Trigger a breakpoint for debugging\nebreak"
 notes:

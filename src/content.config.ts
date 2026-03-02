@@ -13,6 +13,7 @@ const instructions = defineCollection({
     opcode: z.string().optional(),
     funct3: z.string().optional(),
     funct7: z.string().optional(),
+    funct12: z.string().optional(),
     operation: z.string().optional(),
     exampleusage: z.string().optional(),
     notes: z.array(z.string()).optional(),

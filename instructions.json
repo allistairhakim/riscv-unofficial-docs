@@ -1,0 +1,764 @@
+[
+  {
+    "name": "ADD",
+    "inst": "add",
+    "format": "add rd, rs1, rs2",
+    "description": "Adds two source registers (`rs1`, `rs2`) and loads the result into a destination register (`rd`)",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x0",
+    "funct7": "0x00",
+    "operation": "rd = rs1 + rs2",
+    "exampleusage": "// x5 = x6 + x7\\nadd x5, x6, x7",
+    "notes": [
+      "Overflow of the result is ignored (i.e. only the lower 32 bits of the result is loaded into `rd`)"
+    ]
+  },
+  {
+    "name": "ADDI",
+    "fullname": "Add Immediate",
+    "inst": "addi",
+    "format": "addi rd, rs1, imm",
+    "description": "Adds the sign-extended 12-bit immediate to `rs1` and stores the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "rd = rs1 + sign-extend(imm)",
+    "exampleusage": "// x5 = x6 + 10\\naddi x5, x6, 10",
+    "notes": [
+      "`sign-extend(imm)` means the 12-bit immediate is expanded to 32/64 bits by copying its sign bit (bit 11) into all upper bits, preserving negative values",
+      "`addi rd, rs1, 0` is used as the MV (move) pseudo-instruction",
+      "`addi rd, x0, imm` is used as the LI (load immediate) pseudo-instruction",
+      "`addi x0, x0, 0` is encoded as NOP"
+    ]
+  },
+  {
+    "name": "AND",
+    "inst": "and",
+    "format": "and rd, rs1, rs2",
+    "description": "Performs bitwise AND on `rs1` and `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x7",
+    "funct7": "0x00",
+    "operation": "rd = rs1 & rs2",
+    "exampleusage": "// x5 = x6 & x7\\nand x5, x6, x7",
+    "notes": [
+      "Useful for masking bits"
+    ]
+  },
+  {
+    "name": "ANDI",
+    "fullname": "AND Immediate",
+    "inst": "andi",
+    "format": "andi rd, rs1, imm",
+    "description": "Performs bitwise AND on `rs1` and the sign-extended 12-bit immediate, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x7",
+    "funct7": "",
+    "operation": "rd = rs1 & sign-extend(imm)",
+    "exampleusage": "// x5 = x6 & 0xFF\\nandi x5, x6, 0xFF",
+    "notes": [
+      "`&` is the bitwise AND operator (each bit of the result is 1 only if both corresponding bits are 1)",
+      "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits by copying its sign bit",
+      "Useful for masking (keeping only certain bits) and clearing bits"
+    ]
+  },
+  {
+    "name": "AUIPC",
+    "fullname": "Add Upper Immediate to PC",
+    "inst": "auipc",
+    "format": "auipc rd, imm",
+    "description": "Adds the 20-bit immediate (shifted left by 12) to the PC and stores the result in `rd`",
+    "encoding": "U",
+    "opcode": "0010111",
+    "funct3": "",
+    "funct7": "",
+    "operation": "rd = PC + (imm << 12)",
+    "exampleusage": "// x5 = PC + 0x12345000\\nauipc x5, 0x12345",
+    "notes": [
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`<< 12` means left shift by 12 bits, placing the 20-bit immediate in the upper bits",
+      "Used for PC-relative addressing (calculating addresses relative to the current instruction)",
+      "Combined with ADDI or load/store instructions for full 32-bit PC-relative offsets",
+      "Essential for position-independent code (PIC) that can run at any memory address",
+      "The LA (load address) pseudo-instruction uses AUIPC + ADDI"
+    ]
+  },
+  {
+    "name": "BEQ",
+    "fullname": "Branch if Equal",
+    "inst": "beq",
+    "format": "beq rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` equals `rs2`",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "if (rs1 == rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 == x6\\nbeq x5, x6, label",
+    "notes": [
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit, allowing branches backward (negative) or forward (positive)",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)",
+      "`beq rs1, x0, offset` branches if `rs1` is zero (BEQZ pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "BGE",
+    "fullname": "Branch if Greater or Equal",
+    "inst": "bge",
+    "format": "bge rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` is greater than or equal to `rs2` (signed comparison)",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x5",
+    "funct7": "",
+    "operation": "if (rs1 >=s rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 >= x6 (signed)\\nbge x5, x6, label",
+    "notes": [
+      "`>=s` means signed greater-or-equal comparison (treats values as two's complement signed integers)",
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)",
+      "`bge x0, rs2, offset` branches if `rs2` is <= 0 (BLEZ pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "BGEU",
+    "fullname": "Branch if Greater or Equal Unsigned",
+    "inst": "bgeu",
+    "format": "bgeu rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` is greater than or equal to `rs2` (unsigned comparison)",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x7",
+    "funct7": "",
+    "operation": "if (rs1 >=u rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 >= x6 (unsigned)\\nbgeu x5, x6, label",
+    "notes": [
+      "`>=u` means unsigned greater-or-equal comparison (treats values as positive integers, where 0xFFFFFFFF is the largest value)",
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)"
+    ]
+  },
+  {
+    "name": "BLT",
+    "fullname": "Branch if Less Than",
+    "inst": "blt",
+    "format": "blt rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` is less than `rs2` (signed comparison)",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x4",
+    "funct7": "",
+    "operation": "if (rs1 <s rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 < x6 (signed)\\nblt x5, x6, label",
+    "notes": [
+      "`<s` means signed less-than comparison (treats values as two's complement signed integers, where 0xFFFFFFFF = -1)",
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)"
+    ]
+  },
+  {
+    "name": "BLTU",
+    "fullname": "Branch if Less Than Unsigned",
+    "inst": "bltu",
+    "format": "bltu rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` is less than `rs2` (unsigned comparison)",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x6",
+    "funct7": "",
+    "operation": "if (rs1 <u rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 < x6 (unsigned)\\nbltu x5, x6, label",
+    "notes": [
+      "`<u` means unsigned less-than comparison (treats values as positive integers, where 0xFFFFFFFF is the largest value)",
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)"
+    ]
+  },
+  {
+    "name": "BNE",
+    "fullname": "Branch if Not Equal",
+    "inst": "bne",
+    "format": "bne rs1, rs2, offset",
+    "description": "Branches to `PC + offset` if `rs1` does not equal `rs2`",
+    "encoding": "B",
+    "opcode": "1100011",
+    "funct3": "0x1",
+    "funct7": "",
+    "operation": "if (rs1 != rs2) PC = PC + sign-extend(offset)",
+    "exampleusage": "// Branch to label if x5 != x6\\nbne x5, x6, label",
+    "notes": [
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit, allowing branches backward (negative) or forward (positive)",
+      "The offset is in multiples of 2 bytes (branch target must be 2-byte aligned)",
+      "`bne rs1, x0, offset` branches if `rs1` is not zero (BNEZ pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "EBREAK",
+    "fullname": "Environment Break",
+    "inst": "ebreak",
+    "format": "ebreak",
+    "description": "Causes a breakpoint exception, transferring control to a debugger",
+    "encoding": "I",
+    "opcode": "1110011",
+    "funct3": "0x0",
+    "funct7": "",
+    "funct12": "0x001",
+    "operation": "RaiseException(Breakpoint)",
+    "exampleusage": "// Trigger a breakpoint for debugging\\nebreak",
+    "notes": [
+      "Used by debuggers to set breakpoints in code",
+      "Transfers control to a debugging environment",
+      "The exact behavior depends on the debug configuration",
+      "Can be used for software breakpoints or semihosting"
+    ]
+  },
+  {
+    "name": "ECALL",
+    "fullname": "Environment Call",
+    "inst": "ecall",
+    "format": "ecall",
+    "description": "Makes a service request to the execution environment (system call)",
+    "encoding": "I",
+    "opcode": "1110011",
+    "funct3": "0x0",
+    "funct7": "",
+    "funct12": "0x000",
+    "operation": "RaiseException(EnvironmentCall)",
+    "exampleusage": "// Make a system call (syscall number typically in a7)\\necall",
+    "notes": [
+      "Transfers control to the operating system or hypervisor",
+      "System call number and arguments are passed via registers (typically a7 for syscall number, a0-a5 for arguments)",
+      "The exact behavior depends on the execution environment",
+      "In Machine mode, causes an environment-call-from-M-mode exception"
+    ]
+  },
+  {
+    "name": "FENCE",
+    "inst": "fence",
+    "format": "fence pred, succ",
+    "description": "Orders memory operations; ensures all memory accesses in `pred` set complete before any in `succ` set begin",
+    "encoding": "I",
+    "opcode": "0001111",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "fence(pred, succ)",
+    "exampleusage": "// Order all memory operations (full fence)\\nfence iorw, iorw",
+    "notes": [
+      "The 12-bit immediate is split: fm[3:0] (bits 31-28), pred[3:0] (bits 27-24), succ[3:0] (bits 23-20)",
+      "The `pred` and `succ` fields are 4-bit bitmasks specifying memory access types",
+      "Bits: i=input (device), o=output (device), r=read (memory), w=write (memory)",
+      "fm (fence mode) is reserved for future use; standard fence uses fm=0000",
+      "`fence` with no operands defaults to `fence iorw, iorw` (full fence)",
+      "Used to enforce ordering between memory operations in multi-threaded code",
+      "Does not guarantee ordering with respect to instruction fetches (use FENCE.I)"
+    ]
+  },
+  {
+    "name": "JAL",
+    "fullname": "Jump and Link",
+    "inst": "jal",
+    "format": "jal rd, offset",
+    "description": "Jumps to `PC + offset` and stores the return address (`PC + 4`) in `rd`",
+    "encoding": "J",
+    "opcode": "1101111",
+    "funct3": "",
+    "funct7": "",
+    "operation": "rd = PC + 4; PC = PC + sign-extend(offset)",
+    "exampleusage": "// Jump to label, save return address in x1 (ra)\\njal x1, label",
+    "notes": [
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`PC + 4` is the address of the next instruction (return address), saved in `rd`",
+      "`sign-extend(offset)` expands the 20-bit offset to 32/64 bits by copying its sign bit",
+      "The 20-bit offset allows jumps of ±1 MiB (±1,048,576 bytes) from the current PC",
+      "`jal x1, offset` is the standard subroutine call (rd = ra, the return address register)",
+      "`jal x0, offset` is an unconditional jump without saving return address (J pseudo-instruction)",
+      "The offset is in multiples of 2 bytes (target must be 2-byte aligned)"
+    ]
+  },
+  {
+    "name": "JALR",
+    "fullname": "Jump and Link Register",
+    "inst": "jalr",
+    "format": "jalr rd, rs1, offset",
+    "description": "Jumps to `(rs1 + offset) & ~1` and stores the return address (`PC + 4`) in `rd`",
+    "encoding": "I",
+    "opcode": "1100111",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "rd = PC + 4; PC = (rs1 + sign-extend(offset)) & ~1",
+    "exampleusage": "// Jump to address in x5, save return address in x1\\njalr x1, x5, 0",
+    "notes": [
+      "`PC` is the Program Counter (address of the current instruction)",
+      "`PC + 4` is the address of the next instruction (return address), saved in `rd`",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "`& ~1` clears the lowest bit of the result. `~1` is the bitwise NOT of 1 (binary: ...11111110), so ANDing with it forces the address to be even, ensuring 2-byte alignment",
+      "Used for indirect jumps, function returns, and computed jumps",
+      "`jalr x0, x1, 0` is the standard return from subroutine (RET pseudo-instruction)",
+      "Combined with AUIPC for long-range jumps (CALL pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "LB",
+    "fullname": "Load Byte",
+    "inst": "lb",
+    "format": "lb rd, offset(rs1)",
+    "description": "Loads a byte from memory at address `rs1 + offset`, sign-extends it to XLEN bits, and stores in `rd`",
+    "encoding": "I",
+    "opcode": "0000011",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "rd = sign-extend(Memory[rs1 + sign-extend(offset)][7:0])",
+    "exampleusage": "// x5 = sign-extended byte at address (x6 + 4)\\nlb x5, 4(x6)",
+    "notes": [
+      "`Memory[address]` reads from memory at the computed address",
+      "`[7:0]` means bits 7 down to 0 (the lowest 8 bits, i.e., one byte)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "`sign-extend(...)` on the loaded byte expands it from 8 bits to 32/64 bits, preserving negative values (e.g., 0xFF becomes 0xFFFFFFFF)"
+    ]
+  },
+  {
+    "name": "LBU",
+    "fullname": "Load Byte Unsigned",
+    "inst": "lbu",
+    "format": "lbu rd, offset(rs1)",
+    "description": "Loads a byte from memory at address `rs1 + offset`, zero-extends it to XLEN bits, and stores in `rd`",
+    "encoding": "I",
+    "opcode": "0000011",
+    "funct3": "0x4",
+    "funct7": "",
+    "operation": "rd = zero-extend(Memory[rs1 + sign-extend(offset)][7:0])",
+    "exampleusage": "// x5 = zero-extended byte at address (x6 + 4)\\nlbu x5, 4(x6)",
+    "notes": [
+      "`Memory[address]` reads from memory at the computed address",
+      "`[7:0]` means bits 7 down to 0 (the lowest 8 bits, i.e., one byte)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "`zero-extend(...)` pads the upper bits with zeros (e.g., 0xFF becomes 0x000000FF, not 0xFFFFFFFF)",
+      "Use LBU (not LB) when loading unsigned byte values to avoid incorrect negative interpretation"
+    ]
+  },
+  {
+    "name": "LH",
+    "fullname": "Load Halfword",
+    "inst": "lh",
+    "format": "lh rd, offset(rs1)",
+    "description": "Loads a halfword (16 bits) from memory at address `rs1 + offset`, sign-extends it to XLEN bits, and stores in `rd`",
+    "encoding": "I",
+    "opcode": "0000011",
+    "funct3": "0x1",
+    "funct7": "",
+    "operation": "rd = sign-extend(Memory[rs1 + sign-extend(offset)][15:0])",
+    "exampleusage": "// x5 = sign-extended halfword at address (x6 + 4)\\nlh x5, 4(x6)",
+    "notes": [
+      "`Memory[address]` reads from memory at the computed address",
+      "`[15:0]` means bits 15 down to 0 (the lowest 16 bits, i.e., one halfword)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "`sign-extend(...)` on the loaded halfword expands it from 16 bits to 32/64 bits, preserving negative values",
+      "Address should be naturally aligned (2-byte boundary) for best performance"
+    ]
+  },
+  {
+    "name": "LHU",
+    "fullname": "Load Halfword Unsigned",
+    "inst": "lhu",
+    "format": "lhu rd, offset(rs1)",
+    "description": "Loads a halfword (16 bits) from memory at address `rs1 + offset`, zero-extends it to XLEN bits, and stores in `rd`",
+    "encoding": "I",
+    "opcode": "0000011",
+    "funct3": "0x5",
+    "funct7": "",
+    "operation": "rd = zero-extend(Memory[rs1 + sign-extend(offset)][15:0])",
+    "exampleusage": "// x5 = zero-extended halfword at address (x6 + 4)\\nlhu x5, 4(x6)",
+    "notes": [
+      "`Memory[address]` reads from memory at the computed address",
+      "`[15:0]` means bits 15 down to 0 (the lowest 16 bits, i.e., one halfword)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "`zero-extend(...)` pads the upper bits with zeros (e.g., 0xFFFF becomes 0x0000FFFF, not 0xFFFFFFFF)",
+      "Address should be naturally aligned (2-byte boundary) for best performance",
+      "Use LHU (not LH) when loading unsigned halfword values"
+    ]
+  },
+  {
+    "name": "LUI",
+    "fullname": "Load Upper Immediate",
+    "inst": "lui",
+    "format": "lui rd, imm",
+    "description": "Loads the 20-bit immediate into the upper 20 bits of `rd`, filling the lower 12 bits with zeros",
+    "encoding": "U",
+    "opcode": "0110111",
+    "funct3": "",
+    "funct7": "",
+    "operation": "rd = imm << 12",
+    "exampleusage": "// x5 = 0xDEADB000 (upper 20 bits from immediate)\\nlui x5, 0xDEADB",
+    "notes": [
+      "`<< 12` means left shift by 12 bits, effectively placing the immediate in bits [31:12]",
+      "`[31:12]` means bits 31 down to 12 (the upper 20 bits of a 32-bit value)",
+      "The lower 12 bits of rd are filled with zeros",
+      "Used with ADDI to construct 32-bit constants (LI pseudo-instruction uses LUI + ADDI)",
+      "Example: to load 0x12345678 into x5, use `lui x5, 0x12345` then `addi x5, x5, 0x678`"
+    ]
+  },
+  {
+    "name": "LW",
+    "fullname": "Load Word",
+    "inst": "lw",
+    "format": "lw rd, offset(rs1)",
+    "description": "Loads a word (32 bits) from memory at address `rs1 + offset` and stores in `rd`",
+    "encoding": "I",
+    "opcode": "0000011",
+    "funct3": "0x2",
+    "funct7": "",
+    "operation": "rd = sign-extend(Memory[rs1 + sign-extend(offset)][31:0])",
+    "exampleusage": "// x5 = word at address (x6 + 8)\\nlw x5, 8(x6)",
+    "notes": [
+      "`Memory[address]` reads from memory at the computed address",
+      "`[31:0]` means bits 31 down to 0 (the lowest 32 bits, i.e., one word)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "In RV64, the loaded 32-bit word is sign-extended to 64 bits",
+      "Address should be naturally aligned (4-byte boundary) for best performance"
+    ]
+  },
+  {
+    "name": "OR",
+    "inst": "or",
+    "format": "or rd, rs1, rs2",
+    "description": "Performs bitwise OR on `rs1` and `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x6",
+    "funct7": "0x00",
+    "operation": "rd = rs1 | rs2",
+    "exampleusage": "// x5 = x6 | x7\\nor x5, x6, x7",
+    "notes": [
+      "`|` is the bitwise OR operator (each bit of the result is 1 if either corresponding bit is 1)",
+      "While `or rd, rs1, x0` can copy a register, the canonical MV pseudo-instruction uses `addi rd, rs1, 0`"
+    ]
+  },
+  {
+    "name": "ORI",
+    "fullname": "OR Immediate",
+    "inst": "ori",
+    "format": "ori rd, rs1, imm",
+    "description": "Performs bitwise OR on `rs1` and the sign-extended 12-bit immediate, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x6",
+    "funct7": "",
+    "operation": "rd = rs1 | sign-extend(imm)",
+    "exampleusage": "// x5 = x6 | 0xFF\\nori x5, x6, 0xFF",
+    "notes": [
+      "`|` is the bitwise OR operator (each bit of the result is 1 if either corresponding bit is 1)",
+      "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits by copying its sign bit",
+      "Useful for setting specific bits to 1"
+    ]
+  },
+  {
+    "name": "SB",
+    "fullname": "Store Byte",
+    "inst": "sb",
+    "format": "sb rs2, offset(rs1)",
+    "description": "Stores the lowest byte of `rs2` to memory at address `rs1 + offset`",
+    "encoding": "S",
+    "opcode": "0100011",
+    "funct3": "0x0",
+    "funct7": "",
+    "operation": "Memory[rs1 + sign-extend(offset)] = rs2[7:0]",
+    "exampleusage": "// Store lowest byte of x5 to address (x6 + 4)\\nsb x5, 4(x6)",
+    "notes": [
+      "`Memory[address] = value` writes to memory at the computed address",
+      "`rs2[7:0]` means bits 7 down to 0 of rs2 (the lowest 8 bits, i.e., one byte)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "Only the lowest 8 bits of rs2 are stored; the upper bits are ignored"
+    ]
+  },
+  {
+    "name": "SH",
+    "fullname": "Store Halfword",
+    "inst": "sh",
+    "format": "sh rs2, offset(rs1)",
+    "description": "Stores the lowest halfword (16 bits) of `rs2` to memory at address `rs1 + offset`",
+    "encoding": "S",
+    "opcode": "0100011",
+    "funct3": "0x1",
+    "funct7": "",
+    "operation": "Memory[rs1 + sign-extend(offset)] = rs2[15:0]",
+    "exampleusage": "// Store lowest halfword of x5 to address (x6 + 4)\\nsh x5, 4(x6)",
+    "notes": [
+      "`Memory[address] = value` writes to memory at the computed address",
+      "`rs2[15:0]` means bits 15 down to 0 of rs2 (the lowest 16 bits, i.e., one halfword)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "Only the lowest 16 bits of rs2 are stored; the upper bits are ignored",
+      "Address should be naturally aligned (2-byte boundary) for best performance"
+    ]
+  },
+  {
+    "name": "SLL",
+    "fullname": "Shift Left Logical",
+    "inst": "sll",
+    "format": "sll rd, rs1, rs2",
+    "description": "Performs logical left shift on `rs1` by the shift amount in the lower 5 bits (RV32) or 6 bits (RV64) of `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x1",
+    "funct7": "0x00",
+    "operation": "rd = rs1 << rs2[4:0]",
+    "exampleusage": "// x5 = x6 << x7[4:0]\\nsll x5, x6, x7",
+    "notes": [
+      "`<<` is the left shift operator (moves bits toward more significant positions)",
+      "`rs2[4:0]` means bits 4 down to 0 of rs2 (the lowest 5 bits), giving a shift amount of 0-31",
+      "Zeros are shifted into the lower (least significant) bits",
+      "Left shifting by n is equivalent to multiplying by 2^n"
+    ]
+  },
+  {
+    "name": "SLLI",
+    "fullname": "Shift Left Logical Immediate",
+    "inst": "slli",
+    "format": "slli rd, rs1, shamt",
+    "description": "Performs logical left shift on `rs1` by the shift amount `shamt`, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x1",
+    "funct7": "0x00",
+    "operation": "rd = rs1 << shamt",
+    "exampleusage": "// x5 = x6 << 3\\nslli x5, x6, 3",
+    "notes": [
+      "`<<` is the left shift operator (moves bits toward more significant positions)",
+      "`shamt` (shift amount) is a 5-bit value (0-31) encoded in the instruction",
+      "Zeros are shifted into the lower (least significant) bits",
+      "Left shifting by n is equivalent to multiplying by 2^n"
+    ]
+  },
+  {
+    "name": "SLT",
+    "fullname": "Set Less Than",
+    "inst": "slt",
+    "format": "slt rd, rs1, rs2",
+    "description": "Sets `rd` to 1 if `rs1` is less than `rs2` using signed comparison, otherwise sets `rd` to 0",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x2",
+    "funct7": "0x00",
+    "operation": "rd = (rs1 <s rs2) ? 1 : 0",
+    "exampleusage": "// x5 = (x6 < x7) ? 1 : 0 (signed)\\nslt x5, x6, x7",
+    "notes": [
+      "`<s` means signed less-than comparison (treats values as two's complement signed integers, where 0xFFFFFFFF = -1)",
+      "`? 1 : 0` is the ternary operator: if the condition is true, the result is 1; otherwise, 0",
+      "Result is always 0 or 1, stored in rd"
+    ]
+  },
+  {
+    "name": "SLTI",
+    "fullname": "Set Less Than Immediate",
+    "inst": "slti",
+    "format": "slti rd, rs1, imm",
+    "description": "Sets `rd` to 1 if `rs1` is less than the sign-extended immediate using signed comparison, otherwise sets `rd` to 0",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x2",
+    "funct7": "",
+    "operation": "rd = (rs1 <s sign-extend(imm)) ? 1 : 0",
+    "exampleusage": "// x5 = (x6 < 10) ? 1 : 0 (signed)\\nslti x5, x6, 10",
+    "notes": [
+      "`<s` means signed comparison (treating values as two's complement signed integers)",
+      "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits by copying its sign bit",
+      "Result is always 0 or 1"
+    ]
+  },
+  {
+    "name": "SLTIU",
+    "fullname": "Set Less Than Immediate Unsigned",
+    "inst": "sltiu",
+    "format": "sltiu rd, rs1, imm",
+    "description": "Sets `rd` to 1 if `rs1` is less than the sign-extended immediate using unsigned comparison, otherwise sets `rd` to 0",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x3",
+    "funct7": "",
+    "operation": "rd = (rs1 <u sign-extend(imm)) ? 1 : 0",
+    "exampleusage": "// x5 = (x6 < 10) ? 1 : 0 (unsigned)\\nsltiu x5, x6, 10",
+    "notes": [
+      "`<u` means unsigned comparison (treating values as positive integers)",
+      "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits, then the result is treated as unsigned for comparison",
+      "`sltiu rd, rs1, 1` sets `rd` to 1 if `rs1` equals zero (SEQZ pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "SLTU",
+    "fullname": "Set Less Than Unsigned",
+    "inst": "sltu",
+    "format": "sltu rd, rs1, rs2",
+    "description": "Sets `rd` to 1 if `rs1` is less than `rs2` using unsigned comparison, otherwise sets `rd` to 0",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x3",
+    "funct7": "0x00",
+    "operation": "rd = (rs1 <u rs2) ? 1 : 0",
+    "exampleusage": "// x5 = (x6 < x7) ? 1 : 0 (unsigned)\\nsltu x5, x6, x7",
+    "notes": [
+      "`<u` means unsigned less-than comparison (treats values as positive integers, where 0xFFFFFFFF is the largest value)",
+      "`? 1 : 0` is the ternary operator: if the condition is true, the result is 1; otherwise, 0",
+      "Result is always 0 or 1, stored in rd",
+      "`sltu rd, x0, rs2` sets `rd` to 1 if `rs2` is not zero (SNEZ pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "SRA",
+    "fullname": "Shift Right Arithmetic",
+    "inst": "sra",
+    "format": "sra rd, rs1, rs2",
+    "description": "Performs arithmetic right shift on `rs1` by the shift amount in the lower 5 bits (RV32) or 6 bits (RV64) of `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x5",
+    "funct7": "0x20",
+    "operation": "rd = rs1 >>s rs2[4:0]",
+    "exampleusage": "// x5 = x6 >> x7[4:0] (arithmetic)\\nsra x5, x6, x7",
+    "notes": [
+      "`>>s` is the arithmetic (signed) right shift operator",
+      "`rs2[4:0]` means bits 4 down to 0 of rs2 (the lowest 5 bits), giving a shift amount of 0-31",
+      "The sign bit (bit 31 in RV32) is copied into the vacated upper bits, preserving the sign of negative numbers",
+      "Arithmetic right shift treats the value as signed (use SRL for unsigned values)",
+      "Right shifting by n is equivalent to signed division by 2^n (rounding toward negative infinity)"
+    ]
+  },
+  {
+    "name": "SRAI",
+    "fullname": "Shift Right Arithmetic Immediate",
+    "inst": "srai",
+    "format": "srai rd, rs1, shamt",
+    "description": "Performs arithmetic right shift on `rs1` by the shift amount `shamt`, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x5",
+    "funct7": "0x20",
+    "operation": "rd = rs1 >>s shamt",
+    "exampleusage": "// x5 = x6 >> 3 (arithmetic)\\nsrai x5, x6, 3",
+    "notes": [
+      "`>>s` is the arithmetic (signed) right shift operator",
+      "`shamt` (shift amount) is a 5-bit value (0-31) encoded in the instruction",
+      "The sign bit (bit 31 in RV32) is copied into the vacated upper bits, preserving the sign of negative numbers",
+      "Arithmetic right shift treats the value as signed (use SRLI for unsigned values)",
+      "Right shifting by n is equivalent to signed division by 2^n (rounding toward negative infinity)"
+    ]
+  },
+  {
+    "name": "SRL",
+    "fullname": "Shift Right Logical",
+    "inst": "srl",
+    "format": "srl rd, rs1, rs2",
+    "description": "Performs logical right shift on `rs1` by the shift amount in the lower 5 bits (RV32) or 6 bits (RV64) of `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x5",
+    "funct7": "0x00",
+    "operation": "rd = rs1 >> rs2[4:0]",
+    "exampleusage": "// x5 = x6 >> x7[4:0] (logical)\\nsrl x5, x6, x7",
+    "notes": [
+      "`>>` is the logical right shift operator (moves bits toward less significant positions)",
+      "`rs2[4:0]` means bits 4 down to 0 of rs2 (the lowest 5 bits), giving a shift amount of 0-31",
+      "Zeros are shifted into the upper (most significant) bits",
+      "Logical right shift treats the value as unsigned (use SRA for signed values)",
+      "Right shifting by n is equivalent to unsigned division by 2^n"
+    ]
+  },
+  {
+    "name": "SRLI",
+    "fullname": "Shift Right Logical Immediate",
+    "inst": "srli",
+    "format": "srli rd, rs1, shamt",
+    "description": "Performs logical right shift on `rs1` by the shift amount `shamt`, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x5",
+    "funct7": "0x00",
+    "operation": "rd = rs1 >> shamt",
+    "exampleusage": "// x5 = x6 >> 3 (logical)\\nsrli x5, x6, 3",
+    "notes": [
+      "`>>` is the logical right shift operator (moves bits toward less significant positions)",
+      "`shamt` (shift amount) is a 5-bit value (0-31) encoded in the instruction",
+      "Zeros are shifted into the upper (most significant) bits",
+      "Logical right shift treats the value as unsigned (use SRAI for signed values)",
+      "Right shifting by n is equivalent to unsigned division by 2^n"
+    ]
+  },
+  {
+    "name": "SUB",
+    "fullname": "Subtract",
+    "inst": "sub",
+    "format": "sub rd, rs1, rs2",
+    "description": "Subtracts `rs2` from `rs1` and stores the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x0",
+    "funct7": "0x20",
+    "operation": "rd = rs1 - rs2",
+    "exampleusage": "// x5 = x6 - x7\\nsub x5, x6, x7",
+    "notes": [
+      "Overflow is ignored; only the lower XLEN bits are written to `rd`",
+      "The only difference from ADD is bit 30 of funct7"
+    ]
+  },
+  {
+    "name": "SW",
+    "fullname": "Store Word",
+    "inst": "sw",
+    "format": "sw rs2, offset(rs1)",
+    "description": "Stores the lowest word (32 bits) of `rs2` to memory at address `rs1 + offset`",
+    "encoding": "S",
+    "opcode": "0100011",
+    "funct3": "0x2",
+    "funct7": "",
+    "operation": "Memory[rs1 + sign-extend(offset)] = rs2[31:0]",
+    "exampleusage": "// Store word in x5 to address (x6 + 8)\\nsw x5, 8(x6)",
+    "notes": [
+      "`Memory[address] = value` writes to memory at the computed address",
+      "`rs2[31:0]` means bits 31 down to 0 of rs2 (the lowest 32 bits, i.e., one word)",
+      "`sign-extend(offset)` expands the 12-bit offset to 32/64 bits by copying its sign bit",
+      "In RV32, the entire register is stored; in RV64, only the lowest 32 bits",
+      "Address should be naturally aligned (4-byte boundary) for best performance"
+    ]
+  },
+  {
+    "name": "XOR",
+    "inst": "xor",
+    "format": "xor rd, rs1, rs2",
+    "description": "Performs bitwise exclusive OR on `rs1` and `rs2`, storing the result in `rd`",
+    "encoding": "R",
+    "opcode": "0110011",
+    "funct3": "0x4",
+    "funct7": "0x00",
+    "operation": "rd = rs1 ^ rs2",
+    "exampleusage": "// x5 = x6 ^ x7\\nxor x5, x6, x7",
+    "notes": [
+      "XOR with -1 (all ones) inverts all bits (NOT pseudo-instruction)"
+    ]
+  },
+  {
+    "name": "XORI",
+    "fullname": "XOR Immediate",
+    "inst": "xori",
+    "format": "xori rd, rs1, imm",
+    "description": "Performs bitwise exclusive OR on `rs1` and the sign-extended 12-bit immediate, storing the result in `rd`",
+    "encoding": "I",
+    "opcode": "0010011",
+    "funct3": "0x4",
+    "funct7": "",
+    "operation": "rd = rs1 ^ sign-extend(imm)",
+    "exampleusage": "// x5 = x6 ^ 0xFF\\nxori x5, x6, 0xFF",
+    "notes": [
+      "`^` is the bitwise XOR operator (each bit of the result is 1 if the corresponding bits differ)",
+      "`sign-extend(imm)` expands the 12-bit immediate to 32/64 bits by copying its sign bit",
+      "`xori rd, rs1, -1` inverts all bits of `rs1` (NOT pseudo-instruction)"
+    ]
+  }
+]
