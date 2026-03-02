@@ -4,5 +4,5 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://allistairhakim.github.io',
-  base: '/riscv-unofficial-docs',
+  base: '/riscv-unofficial-docs'
 });

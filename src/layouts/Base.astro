@@ -10,13 +10,14 @@ interface Props {
 const { title, description, keywords } = Astro.props;
 const siteName = "RISC-V Unofficial Reference";
 const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <link rel="preconnect" href="https://rsms.me/">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <meta name="viewport" content="width=device-width" />
@@ -27,8 +28,8 @@ const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
   </head>
   <body>
     <nav>
-      <a href="/">All Instructions</a>
-      <a href="/about">About</a>
+      <a href={base}>All Instructions</a>
+      <a href={`${base}about`}>About</a>
     </nav>
     <main>
       <slot />

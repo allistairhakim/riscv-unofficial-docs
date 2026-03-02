@@ -75,6 +75,7 @@ const formats: Record<string, Field[]> = {
 
 const { type, fields, showLink = false } = Astro.props;
 const fieldList = fields ?? formats[type ?? "R"];
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 
 // Determine field type from name for coloring
 function getFieldType(name: string): string {
@@ -148,7 +149,7 @@ const title = type ? `${type}-type Encoding` : null;
       </div>
     ))}
   </div>
-  {showLink && <a href="/encoding" class="info-link">ⓘ Encoding Reference</a>}
+  {showLink && <a href={`${base}encoding`} class="info-link">ⓘ Encoding Reference</a>}
 </div>
 
 <style>

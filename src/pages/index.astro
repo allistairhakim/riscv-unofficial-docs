@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 const instructions = await getCollection("instructions");
 instructions.sort((a, b) => a.data.name.localeCompare(b.data.name));
 ---
@@ -12,12 +13,12 @@ instructions.sort((a, b) => a.data.name.localeCompare(b.data.name));
   keywords="risc-v, riscv, risc-v instructions, riscv instructions, risc-v reference, riscv reference, risc-v documentation"
 >
   <h1>RISC-V Unofficial Reference</h1>
-  <p><a href="/encoding">Encoding Reference</a>, an overview of all instruction formats</p>
+  <p><a href={`${base}encoding`}>Encoding Reference</a>, an overview of all instruction formats</p>
   <b>Instructions</b>
   <ul class="notes-list">
     {instructions.map((entry) => (
       <li>
-        <a href={`/instructions/${entry.id}`}>
+        <a href={`${base}${entry.id}`}>
           {entry.data.name}{entry.data.fullname && ` (${entry.data.fullname})`}
         </a>
         {entry.data.encoding && <span class="encoding-badge">{entry.data.encoding}</span>}
