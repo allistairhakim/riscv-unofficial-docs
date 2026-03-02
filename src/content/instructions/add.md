@@ -2,7 +2,7 @@
 name: ADD
 inst: add
 format: "add rd, rs1, rs2"
-description: Adds two source registers (`rs1`, `rs2`) and loads the result into a destination register (`rd`)
+description: Adds two source registers (`rs1`, `rs2`) and stores the result into a destination register (`rd`)
 encoding: R
 opcode: "0110011"
 funct3: "0x0"
