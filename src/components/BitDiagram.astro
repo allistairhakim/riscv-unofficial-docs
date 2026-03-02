@@ -1,0 +1,247 @@
+---
+/**
+ * BitDiagram - Displays RISC-V instruction bit layout
+ * 
+ * Usage:
+ *   <BitDiagram type="R" />
+ *   <BitDiagram type="I" />
+ *   <BitDiagram type="S" />
+ *   <BitDiagram type="B" />
+ *   <BitDiagram type="U" />
+ *   <BitDiagram type="J" />
+ * 
+ * Or custom fields:
+ *   <BitDiagram fields={[
+ *     { name: "funct7", bits: 7 },
+ *     { name: "rs2", bits: 5 },
+ *     ...
+ *   ]} />
+ */
+
+interface Field {
+  name: string;
+  bits: number;
+}
+
+interface Props {
+  type?: "R" | "I" | "S" | "B" | "U" | "J";
+  fields?: Field[];
+  showLink?: boolean;
+}
+
+const formats: Record<string, Field[]> = {
+  R: [
+    { name: "funct7", bits: 7 },
+    { name: "rs2", bits: 5 },
+    { name: "rs1", bits: 5 },
+    { name: "funct3", bits: 3 },
+    { name: "rd", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+  I: [
+    { name: "imm[11:0]", bits: 12 },
+    { name: "rs1", bits: 5 },
+    { name: "funct3", bits: 3 },
+    { name: "rd", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+  S: [
+    { name: "imm[11:5]", bits: 7 },
+    { name: "rs2", bits: 5 },
+    { name: "rs1", bits: 5 },
+    { name: "funct3", bits: 3 },
+    { name: "imm[4:0]", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+  B: [
+    { name: "imm[12|10:5]", bits: 7 },
+    { name: "rs2", bits: 5 },
+    { name: "rs1", bits: 5 },
+    { name: "funct3", bits: 3 },
+    { name: "imm[4:1|11]", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+  U: [
+    { name: "imm[31:12]", bits: 20 },
+    { name: "rd", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+  J: [
+    { name: "imm[20|10:1|11|19:12]", bits: 20 },
+    { name: "rd", bits: 5 },
+    { name: "opcode", bits: 7 },
+  ],
+};
+
+const { type, fields, showLink = false } = Astro.props;
+const fieldList = fields ?? formats[type ?? "R"];
+
+// Determine field type from name for coloring
+function getFieldType(name: string): string {
+  const n = name.toLowerCase();
+  if (n === "opcode") return "opcode";
+  if (n === "rd") return "rd";
+  if (n === "rs1") return "rs1";
+  if (n === "rs2") return "rs2";
+  if (n === "funct3") return "funct3";
+  if (n === "funct7") return "funct7";
+  if (n.startsWith("imm")) return "imm";
+  if (n === "shamt") return "shamt";
+  return "default";
+}
+
+// Calculate bit positions (from MSB to LSB)
+let bitPos = 32;
+const fieldsWithPos = fieldList.map((f) => {
+  const start = bitPos - 1;
+  const end = bitPos - f.bits;
+  bitPos = end;
+  return { ...f, start, end, fieldType: getFieldType(f.name) };
+});
+
+// Collect all unique boundary positions for the top ruler
+const boundaries = [31];
+fieldsWithPos.forEach((f) => {
+  if (!boundaries.includes(f.start)) boundaries.push(f.start);
+  if (!boundaries.includes(f.end)) boundaries.push(f.end);
+});
+boundaries.sort((a, b) => b - a);
+
+// Title based on type
+const title = type ? `${type}-type Encoding` : null;
+---
+
+<div class="bit-diagram">
+  {title && <div class="bit-title">{title}</div>}
+
+  <!-- Top bit numbers aligned to grid -->
+  <div class="bit-ruler">
+    {boundaries.map((n) => (
+      <span style={`grid-column: ${32 - n}`}>{n}</span>
+    ))}
+  </div>
+
+  <!-- Field boxes in grid -->
+  <div class="bit-fields">
+    {fieldsWithPos.map((f) => (
+      <div
+        class={`bit-field field-${f.fieldType}`}
+        style={`grid-column: ${32 - f.start} / ${33 - f.end}`}
+      >
+        {f.name}
+      </div>
+    ))}
+  </div>
+
+  <!-- Bottom curly braces with bit counts -->
+  <div class="bit-braces">
+    {fieldsWithPos.map((f) => (
+      <div
+        class="brace-container"
+        style={`grid-column: ${32 - f.start} / ${33 - f.end}`}
+      >
+        <svg class="brace-svg" viewBox="0 0 100 20" preserveAspectRatio="none">
+          <path d="M 0,0 L 0,8 Q 0,12 4,12 L 46,12 Q 50,12 50,16 L 50,20 L 50,16 Q 50,12 54,12 L 96,12 Q 100,12 100,8 L 100,0" 
+                fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <span class="brace-label">{f.bits}</span>
+      </div>
+    ))}
+  </div>
+  {showLink && <a href="/encoding" class="info-link">ⓘ Encoding Reference</a>}
+</div>
+
+<style>
+  .bit-diagram {
+    font-family: ui-monospace, monospace;
+    font-size: 0.8rem;
+    margin: 1.5rem 0;
+    color: #333;
+  }
+
+  .bit-title {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .bit-ruler {
+    display: grid;
+    grid-template-columns: repeat(32, 1fr);
+    margin-bottom: 2px;
+    font-size: 0.7rem;
+    color: #333;
+  }
+
+  .bit-ruler span {
+    text-align: center;
+  }
+
+  .bit-fields {
+    display: grid;
+    grid-template-columns: repeat(32, 1fr);
+    border: 1px solid #333;
+  }
+
+  .bit-field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 0.2rem;
+    border-left: 1px solid #333;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #fff;
+  }
+
+  .bit-field:first-child {
+    border-left: none;
+  }
+
+  /* Field type colors */
+  .field-opcode { background: #e8f5e9; }
+  .field-rd { background: #e3f2fd; }
+  .field-rs1 { background: #fce4ec; }
+  .field-rs2 { background: #f3e5f5; }
+  .field-funct3 { background: #fff3e0; }
+  .field-funct7 { background: #fffde7; }
+  .field-imm { background: #e0f7fa; }
+  .field-shamt { background: #fbe9e7; }
+
+  .bit-braces {
+    display: grid;
+    grid-template-columns: repeat(32, 1fr);
+    margin-top: 2px;
+  }
+
+  .brace-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333;
+  }
+
+  .brace-svg {
+    width: 100%;
+    height: 16px;
+  }
+
+  .brace-label {
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+
+  .info-link {
+    display: block;
+    text-align: right;
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 0.25rem;
+  }
+
+  .info-link:hover {
+    color: #666;
+  }
+</style>

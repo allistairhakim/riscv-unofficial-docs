@@ -1,0 +1,82 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import BitDiagram from "../../components/BitDiagram.astro";
+
+// Generate pages from markdown files in src/content/instructions/
+export async function getStaticPaths() {
+  const entries = await getCollection("instructions");
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { data: entry.data },
+  }));
+}
+
+const { data } = Astro.props;
+
+// Parse inline `code` to <code> elements
+function parseInlineCode(text: string): string {
+  return text.replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+// SEO
+const inst = data.inst || data.name.toLowerCase();
+const displayName = data.fullname ? `${inst} (${data.fullname})` : inst;
+const seoDescription = `${data.name} (${inst}) instruction in RISC-V: ${data.description.replace(/`/g, '')}`;
+const seoKeywords = `${inst}, ${data.name}, risc-v ${inst}, riscv ${inst}, ${inst} in riscv, ${inst} instruction, risc-v instruction, riscv instruction${data.encoding ? `, ${data.encoding}-type` : ''}`;
+---
+
+{/* 
+  TEMPLATE: Edit this file to change how ALL instruction pages look.
+  DATA: Edit individual .md files in src/content/instructions/ for each instruction's data.
+*/}
+
+<Base title={displayName} description={seoDescription} keywords={seoKeywords}>
+  <h1>{data.name}{data.fullname && ` (${data.fullname})`}&nbsp;{data.inst && <code>({data.inst})</code>}</h1>
+  <p set:html={parseInlineCode(data.description)} />
+  {data.format && (
+    <><pre><code>// {data.operation}
+{data.format}</code></pre>
+    </>
+  )}
+  <div class="half-space"></div>
+
+  {data.exampleusage && (
+    <>
+      <b>Example Usage</b>
+      <pre><code>{data.exampleusage}</code></pre>
+    </>
+  )}
+
+  <div class="half-space"></div>
+  {data.notes && data.notes.length > 0 && (
+    <>
+      <b>Notes</b>
+      <ul class="notes-list">
+        {data.notes.map((note) => <li set:html={parseInlineCode(note)} />)}
+      </ul>
+    </>
+  )}
+
+  <div class="half-space"></div>
+  {data.encoding && <BitDiagram type={data.encoding} showLink />}
+
+  {(data.opcode || data.funct3 || data.funct7) && (
+    <table class="encoding-table">
+      <thead>
+        <tr>
+          {data.opcode && <th>Opcode</th>}
+          {data.funct3 && <th>funct3</th>}
+          {data.funct7 && <th>funct7</th>}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          {data.opcode && <td><code>{data.opcode}</code></td>}
+          {data.funct3 && <td><code>{data.funct3}</code></td>}
+          {data.funct7 && <td><code>{data.funct7}</code></td>}
+        </tr>
+      </tbody>
+    </table>
+  )}
+</Base>

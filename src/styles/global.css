@@ -1,0 +1,77 @@
+/* Global styles - edit as needed */
+
+body {
+  line-height: 1.6;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+}
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #1d4ed8;
+}
+
+code {
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+.encoding-badge {
+  font-size: 0.75rem;
+  background: #eee;
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  margin-left: 0.5em;
+  font-family: ui-monospace, monospace;
+}
+
+.notes-list {
+  margin-top: 0.25rem;
+}
+
+.half-space {
+  height: 0.5em;
+}
+
+.encoding-table {
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-family: ui-monospace, monospace;
+}
+
+.encoding-table th,
+.encoding-table td {
+  border: 1px solid #333;
+  padding: 0.4rem 1rem;
+  text-align: center;
+}
+
+.encoding-table th {
+  background: #f4f4f4;
+  font-weight: 600;
+}

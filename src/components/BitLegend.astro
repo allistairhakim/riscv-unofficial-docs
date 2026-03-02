@@ -1,0 +1,68 @@
+---
+/**
+ * BitLegend - Shows what each field name means with colors
+ */
+---
+
+<div class="bit-legend">
+  <h3>Field Reference</h3>
+  <dl class="legend-list">
+    <div><dt class="field-opcode">opcode</dt><dd>Operation code — identifies the instruction type</dd></div>
+    <div><dt class="field-rd">rd</dt><dd>Destination register — where the result is stored</dd></div>
+    <div><dt class="field-rs1">rs1</dt><dd>Source register 1 — first operand</dd></div>
+    <div><dt class="field-rs2">rs2</dt><dd>Source register 2 — second operand</dd></div>
+    <div><dt class="field-funct3">funct3</dt><dd>3-bit function code — distinguishes instructions with the same opcode</dd></div>
+    <div><dt class="field-funct7">funct7</dt><dd>7-bit function code — further distinguishes instructions</dd></div>
+    <div><dt class="field-imm">imm</dt><dd>Immediate — constant value encoded in the instruction</dd></div>
+    <div><dt class="field-shamt">shamt</dt><dd>Shift amount — number of bits to shift</dd></div>
+  </dl>
+</div>
+
+<style>
+  .bit-legend {
+    border: 1px solid #333;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    font-family: ui-monospace, monospace;
+  }
+
+  .bit-legend h3 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+  }
+
+  .legend-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+  }
+
+  .legend-list div {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .legend-list dt {
+    font-weight: 600;
+    min-width: 4rem;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid #333;
+    text-align: center;
+  }
+
+  .legend-list dd {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  /* Field type colors */
+  .field-opcode { background: #e8f5e9; }
+  .field-rd { background: #e3f2fd; }
+  .field-rs1 { background: #fce4ec; }
+  .field-rs2 { background: #f3e5f5; }
+  .field-funct3 { background: #fff3e0; }
+  .field-funct7 { background: #fffde7; }
+  .field-imm { background: #e0f7fa; }
+  .field-shamt { background: #fbe9e7; }
+</style>

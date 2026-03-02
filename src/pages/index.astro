@@ -1,0 +1,27 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+
+const instructions = await getCollection("instructions");
+instructions.sort((a, b) => a.data.name.localeCompare(b.data.name));
+---
+
+<Base 
+  title="RISC-V Unofficial Reference" 
+  description="Unofficial RISC-V instruction reference. Easy-to-read documentation for RISC-V instructions including ADD, SUB, JALR, BEQ, and more."
+  keywords="risc-v, riscv, risc-v instructions, riscv instructions, risc-v reference, riscv reference, risc-v documentation"
+>
+  <h1>RISC-V Unofficial Reference</h1>
+  <p><a href="/encoding">Encoding Reference</a>, an overview of all instruction formats</p>
+  <b>Instructions</b>
+  <ul class="notes-list">
+    {instructions.map((entry) => (
+      <li>
+        <a href={`/instructions/${entry.id}`}>
+          {entry.data.name}{entry.data.fullname && ` (${entry.data.fullname})`}
+        </a>
+        {entry.data.encoding && <span class="encoding-badge">{entry.data.encoding}</span>}
+      </li>
+    ))}
+  </ul>
+</Base>

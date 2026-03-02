@@ -1,0 +1,64 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  keywords?: string;
+}
+
+const { title, description, keywords } = Astro.props;
+const siteName = "RISC-V Unofficial Reference";
+const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <meta name="viewport" content="width=device-width" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {keywords && <meta name="keywords" content={keywords} />}
+    <meta name="robots" content="index, follow" />
+  </head>
+  <body>
+    <nav>
+      <a href="/">All Instructions</a>
+      <a href="/about">About</a>
+    </nav>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>This is unofficial documentation for RISC-V and is not affiliated with or endorsed by RISC-V International.</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  nav a {
+    color: inherit;
+  }
+
+  nav a:hover {
+    color: #666;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+    font-size: 0.8rem;
+    color: #666;
+  }
+</style>

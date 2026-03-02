@@ -1,0 +1,55 @@
+---
+import Base from "../layouts/Base.astro";
+import BitDiagram from "../components/BitDiagram.astro";
+import BitLegend from "../components/BitLegend.astro";
+---
+
+<Base 
+  title="Encoding Reference" 
+  description="RISC-V instruction encoding formats: R-type, I-type, S-type, B-type, U-type, J-type. Learn how RISC-V instructions are encoded in 32-bit formats."
+  keywords="risc-v encoding, riscv encoding, risc-v instruction format, R-type, I-type, S-type, B-type, U-type, J-type, risc-v opcode, riscv funct3, riscv funct7"
+>
+  <h1>Encoding Reference</h1>
+  <p>All RISC-V instructions are 32 bits wide and follow one of six encoding formats.</p>
+
+  <BitLegend />
+
+  <br>
+  <h3>R-type (Register)</h3>
+  <p class="type-desc">Used for register-to-register operations like <code>ADD</code>, <code>SUB</code>, <code>AND</code>, <code>OR</code>.</p>
+  <BitDiagram type="R" />
+  <div class="half-space"></div>
+
+  <h3>I-type (Immediate)</h3>
+  <p class="type-desc">Used for immediate operations and loads: <code>ADDI</code>, <code>LW</code>, <code>JALR</code>.</p>
+  <BitDiagram type="I" />
+  <div class="half-space"></div>
+
+  <h3>S-type (Store)</h3>
+  <p class="type-desc">Used for store instructions: <code>SW</code>, <code>SH</code>, <code>SB</code>.</p>
+  <BitDiagram type="S" />
+  <div class="half-space"></div>
+
+  <h3>B-type (Branch)</h3>
+  <p class="type-desc">Used for conditional branches: <code>BEQ</code>, <code>BNE</code>, <code>BLT</code>.</p>
+  <BitDiagram type="B" />
+  <div class="half-space"></div>
+
+  <h3>U-type (Upper Immediate)</h3>
+  <p class="type-desc">Used for <code>LUI</code> and <code>AUIPC</code> (loading upper 20 bits).</p>
+  <BitDiagram type="U" />
+  <div class="half-space"></div>
+
+  <h3>J-type (Jump)</h3>
+  <p class="type-desc">Used for <code>JAL</code> (jump and link).</p>
+  <BitDiagram type="J" />
+</Base>
+
+<style>
+  h3 {
+    margin-bottom: 0.25rem;
+  }
+  .type-desc {
+    margin-top: 0;
+  }
+</style>
