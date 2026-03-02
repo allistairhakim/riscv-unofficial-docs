@@ -16,9 +16,27 @@ export async function getStaticPaths() {
 
 const { data } = Astro.props;
 
-// Parse inline `code` to <code> elements
+// Parse inline `code` to <code> elements, escaping HTML first
 function parseInlineCode(text: string): string {
-  return text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // First, extract code blocks and replace with placeholders
+  const codeBlocks: string[] = [];
+  const withPlaceholders = text.replace(/`([^`]+)`/g, (_, code) => {
+    codeBlocks.push(code);
+    return `___CODE_${codeBlocks.length - 1}___`;
+  });
+  // Escape HTML in the non-code parts
+  const escaped = withPlaceholders
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // Restore code blocks wrapped in <code> tags (code content is also escaped)
+  return escaped.replace(/___CODE_(\d+)___/g, (_, i) => {
+    const code = codeBlocks[parseInt(i)]
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return `<code>${code}</code>`;
+  });
 }
 
 // SEO
